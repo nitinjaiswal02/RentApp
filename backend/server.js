@@ -12,7 +12,7 @@ const app = express();
 
 // CORS (so that frontend can call )
 app.use(cors({
-  origin: ["https://rent-app-one-roan.vercel.app/"], // allow your frontend
+  origin: ["https://rent-app-ecru-nine.vercel.app/"], // allow your frontend
   methods: ["GET","POST","PUT","DELETE"],
   credentials: true
 }));
