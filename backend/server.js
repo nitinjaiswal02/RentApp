@@ -1,32 +1,43 @@
-// server.js  (REPLACE CONTENTS)
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import { Property, Tenant, Payment } from "./db.js"; 
 import cors from "cors";
-import { authenticateToken } from "./auth.js";
 import dotenv from "dotenv";
+
+import { Property, Tenant, Payment } from "./db.js"; 
+import { authenticateToken } from "./auth.js";
 
 dotenv.config();
 const app = express();
 
-// CORS (so that frontend can call )
-app.use(cors({ origin: "*" }));
+// ------------------ Middleware ------------------ //
 
+// ✅ CORS (restrict to your Vercel frontend domain + preflight)
+app.use(cors({
+  origin: ["https://rent-app-ecru-nine.vercel.app"], // replace with your deployed frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+}));
+app.options("*", cors()); // allow all preflight requests
 
-//  MongoDB connection
-const MONGODB_URI = process.env.MONGO_URI ;
+// ✅ Body parser (parse JSON request bodies)
+app.use(bodyParser.json());
+
+// ------------------ MongoDB Connection ------------------ //
+const MONGODB_URI = process.env.MONGO_URI;
 mongoose
   .connect(MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
+  .then(() => console.log(" MongoDB connected"))
   .catch((err) => {
     console.error("MongoDB connection error:", err);
     process.exit(1);
   });
 
-// Auth: Firebase protected "who am I"
+// ------------------ Routes ------------------ //
+
+// Test Auth route
 app.get("/api/me", authenticateToken, (req, res) => {
-  // req.user is the decoded Firebase token
   res.json({
     success: true,
     user: {
@@ -37,7 +48,7 @@ app.get("/api/me", authenticateToken, (req, res) => {
   });
 });
 
-// PROPERTIES 
+// --------- PROPERTIES --------- //
 app.post("/api/properties", authenticateToken, async (req, res) => {
   try {
     const { name, address, rentAmount, type } = req.body;
@@ -50,7 +61,7 @@ app.post("/api/properties", authenticateToken, async (req, res) => {
       rentAmount,
       type,
       tenants: [],
-      userId: req.user.uid, // tie to Firebase user
+      userId: req.user.uid,
     });
     await property.save();
     res.status(201).json(property);
@@ -71,7 +82,7 @@ app.get("/api/properties", authenticateToken, async (req, res) => {
   }
 });
 
-// ========== TENANTS ==========
+// --------- TENANTS --------- //
 app.post("/api/tenants", authenticateToken, async (req, res) => {
   try {
     const { name, contact, propertyId, rentDueDate } = req.body;
@@ -79,7 +90,6 @@ app.post("/api/tenants", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Validate property belongs to this user
     const property = await Property.findOne({ _id: propertyId, userId: req.user.uid });
     if (!property) return res.status(404).json({ error: "Property not found" });
 
@@ -108,7 +118,6 @@ app.get("/api/tenants", authenticateToken, async (req, res) => {
       .populate({ path: "propertyId", select: "name address rentAmount type" })
       .populate({ path: "payments", select: "amountPaid date" });
 
-    // just return data
     const result = tenants.map((t) => ({
       _id: t._id,
       name: t.name,
@@ -124,7 +133,7 @@ app.get("/api/tenants", authenticateToken, async (req, res) => {
   }
 });
 
-// ========== PAYMENTS (amountPaid + date)
+// --------- PAYMENTS --------- //
 app.post("/api/payments", authenticateToken, async (req, res) => {
   try {
     const { tenantId, amountPaid, date } = req.body;
@@ -132,7 +141,6 @@ app.post("/api/payments", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Ensure tenant belongs to this user
     const tenant = await Tenant.findOne({ _id: tenantId, userId: req.user.uid });
     if (!tenant) return res.status(404).json({ error: "Tenant not found" });
 
@@ -144,7 +152,7 @@ app.post("/api/payments", authenticateToken, async (req, res) => {
     });
 
     await payment.save();
-    // maintain relation if your schema uses refs
+
     if (tenant.payments) {
       tenant.payments.push(payment._id);
       await tenant.save();
@@ -157,12 +165,9 @@ app.post("/api/payments", authenticateToken, async (req, res) => {
   }
 });
 
-// list payments for a tenant (no summaries)
 app.get("/api/payments/:tenantId", authenticateToken, async (req, res) => {
   try {
     const { tenantId } = req.params;
-
-    // verify tenant belongs to user
     const tenant = await Tenant.findOne({ _id: tenantId, userId: req.user.uid });
     if (!tenant) return res.status(404).json({ error: "Tenant not found" });
 
@@ -176,7 +181,6 @@ app.get("/api/payments/:tenantId", authenticateToken, async (req, res) => {
   }
 });
 
-// list all payments for current user
 app.get("/api/payments", authenticateToken, async (req, res) => {
   try {
     const payments = await Payment.find({ userId: req.user.uid })
@@ -190,23 +194,19 @@ app.get("/api/payments", authenticateToken, async (req, res) => {
   }
 });
 
-
-// now logic to delete tenant from database
-app.delete("/api/tenants/:id", async (req, res) => {
+// --------- DELETE TENANT --------- //
+app.delete("/api/tenants/:id", authenticateToken, async (req, res) => {
   try {
-    const tenant = await Tenant.findByIdAndDelete(req.params.id);
-    if (!tenant) {
-      return res.status(404).json({ message: "Tenant not found" });
-    }
+    const tenant = await Tenant.findOneAndDelete({ _id: req.params.id, userId: req.user.uid });
+    if (!tenant) return res.status(404).json({ message: "Tenant not found" });
     res.json({ message: "Tenant deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-
-// --- Start server ---
+// ------------------ Start Server ------------------ //
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
