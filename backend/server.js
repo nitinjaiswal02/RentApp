@@ -11,11 +11,8 @@ dotenv.config();
 const app = express();
 
 // CORS (so that frontend can call )
-app.use(cors({
-  origin: ["https://rent-app-ecru-nine.vercel.app/"], // allow your frontend
-  methods: ["GET","POST","PUT","DELETE"],
-  credentials: true
-}));
+app.use(cors({ origin: "*" }));
+
 
 //  MongoDB connection
 const MONGODB_URI = process.env.MONGO_URI ;
