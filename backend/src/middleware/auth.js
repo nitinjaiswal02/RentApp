@@ -1,5 +1,5 @@
-// auth.js  (REPLACE CONTENTS)
-import admin from "./firebase.js";
+// src/middleware/auth.js
+import admin from "../config/firebase.js";
 
 export async function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -11,7 +11,6 @@ export async function authenticateToken(req, res, next) {
 
   try {
     const decoded = await admin.auth().verifyIdToken(idToken);
-    // decoded contains { uid, email, email_verified, ... }
     req.user = decoded;
     next();
   } catch (err) {
