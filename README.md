@@ -10,54 +10,86 @@ A full-stack rent management web application for landlords to manage properties,
 
 ---
 
+## 📸 Screenshots
+
+### 🏠 Home Page
+<img width="1470" height="883" alt="Screenshot 2026-06-23 at 8 22 33 PM" src="https://github.com/user-attachments/assets/8be3f718-7a8d-4bc8-9687-b5d8d6f5d51e" />
+
+
+### 📊 Dashboard
+<img width="1470" height="883" alt="Screenshot 2026-06-23 at 8 20 57 PM" src="https://github.com/user-attachments/assets/8a6a9be9-7c3c-4516-ac2d-9bad7ee3a95f" />
+
+
+### 🏘️ Properties Management
+<img width="1470" height="883" alt="Screenshot 2026-06-23 at 8 21 04 PM" src="https://github.com/user-attachments/assets/356f9f82-8f52-4448-ac1f-e0a58491bed8" />
+
+
+### 💳 Payments Management
+<img width="1470" height="883" alt="Screenshot 2026-06-23 at 8 22 24 PM" src="https://github.com/user-attachments/assets/7731baf7-bf09-4a57-8f9e-5a6785dfc045" />
+
+
+---
+
 ## 📁 Project Structure
 
-```
+```bash
 RentApp/
-├── backend/                        # Node.js + Express REST API
+│
+├── backend/
 │   ├── src/
 │   │   ├── config/
-│   │   │   ├── db.js               # MongoDB connection
-│   │   │   └── firebase.js         # Firebase Admin SDK setup
+│   │   │   ├── db.js
+│   │   │   └── firebase.js
+│   │   │
 │   │   ├── controllers/
 │   │   │   ├── property.controller.js
 │   │   │   ├── tenant.controller.js
 │   │   │   └── payment.controller.js
+│   │   │
 │   │   ├── middleware/
-│   │   │   └── auth.js             # Firebase token verification
+│   │   │   └── auth.js
+│   │   │
 │   │   ├── models/
 │   │   │   ├── Property.js
 │   │   │   ├── Tenant.js
 │   │   │   └── Payment.js
+│   │   │
 │   │   ├── routes/
 │   │   │   ├── property.routes.js
 │   │   │   ├── tenant.routes.js
 │   │   │   └── payment.routes.js
-│   │   └── app.js                  # Express app config
-│   ├── server.js                   # Entry point
+│   │   │
+│   │   └── app.js
+│   │
+│   ├── server.js
 │   ├── .env.example
 │   └── package.json
 │
-└── frontend/                       # React + Vite app
+└── frontend/
     ├── public/
+    │
     ├── src/
     │   ├── assets/
+    │   │
     │   ├── pages/
     │   │   ├── Dashboard.jsx
     │   │   ├── Home.jsx
     │   │   ├── Login.jsx
     │   │   ├── Navbar.jsx
-    │   │   ├── Payments.jsx
+    │   │   ├── Logo.jsx
     │   │   ├── Properties.jsx
-    │   │   ├── Signup.jsx
-    │   │   └── Tenants.jsx
+    │   │   ├── Tenants.jsx
+    │   │   ├── Payments.jsx
+    │   │   └── Signup.jsx
+    │   │
     │   ├── routes/
-    │   ├── api.jsx                 # Axios instance
-    │   ├── firebase.jsx            # Firebase client config
+    │   ├── api.jsx
+    │   ├── firebase.jsx
     │   ├── App.jsx
     │   ├── App.css
     │   ├── main.jsx
     │   └── index.css
+    │
     ├── .env
     ├── index.html
     ├── vite.config.js
@@ -78,6 +110,7 @@ RentApp/
 | Deployment (FE) | Vercel |
 
 ---
+
 
 ## 🔧 Getting Started
 
